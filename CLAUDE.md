@@ -38,7 +38,7 @@ npm run clean
 
 **Page routing:** Files in `src/` automatically become pages:
 - `src/index.md` → `/`
-- `src/supercomputers/example-system-1.md` → `/supercomputers/example-system-1`
+- `src/supercomputers/polaris/index.md` → `/supercomputers/polaris/`
 
 **Data loaders:** Place in `src/data/` directory. These run at build time (not in browser):
 - Must output to stdout (e.g., `process.stdout.write(JSON.stringify(data))`)
@@ -50,10 +50,12 @@ npm run clean
 
 - `src/index.md` - Main landing page listing all supercomputers
 - `src/supercomputers/<system-name>/` - Each supercomputer has its own folder containing:
+  - `info.yaml` - System metadata (name, description)
   - `index.md` - System page with visualizations
   - `machine.jpg` - System image for card background
   - `data.csv` - Performance data
 - `src/data/` - Data loaders that fetch/process benchmark data at build time
+  - `supercomputers.json.js` - Scans supercomputers directory and reads info.yaml files
 - `observablehq.config.js` - Framework configuration (title, header, footer, theme)
 - `dist/` - Build output (not tracked in git)
 
@@ -83,18 +85,16 @@ html`<div>${content}</div>`
 ## Adding a New Supercomputer
 
 1. Create folder `src/supercomputers/<system-slug>/`
-2. Create `src/supercomputers/<system-slug>/index.md` with visualizations
-3. Add `src/supercomputers/<system-slug>/machine.jpg` for the card background image
-4. Add `src/supercomputers/<system-slug>/data.csv` or other data files
-5. Add entry to `supercomputers` array in `src/index.md`:
-   ```js
-   {
-     name: "System Name",
-     slug: "system-slug",
-     description: "Description text",
-     image: await FileAttachment("supercomputers/system-slug/machine.jpg").url()
-   }
+2. Create `src/supercomputers/<system-slug>/info.yaml`:
+   ```yaml
+   name: System Name
+   description: Description text
    ```
+3. Create `src/supercomputers/<system-slug>/index.md` with visualizations
+4. Add `src/supercomputers/<system-slug>/machine.jpg` for the card background image
+5. Add `src/supercomputers/<system-slug>/data.csv` or other data files
+
+The supercomputer will automatically appear on the homepage - no need to manually edit `src/index.md`. The `src/data/supercomputers.json.js` data loader scans the supercomputers directory at build time and generates the list automatically.
 
 ## Configuration
 

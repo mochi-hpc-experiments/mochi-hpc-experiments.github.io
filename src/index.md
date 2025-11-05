@@ -4,30 +4,31 @@ Welcome to the Mochi HPC Benchmark Performance Dashboard. This site presents per
 
 ## Available Supercomputers
 
-Select a supercomputer below to view its benchmark performance data:
+Select a supercomputer below to view its benchmark performance data.
 
 
 ```js
-// Define the list of supercomputers
-const supercomputers = [
-  {
-    name: "Example System 1",
-    slug: "example-system-1",
-    description: "Description of Example System 1",
-    image: await FileAttachment("supercomputers/example-system-1/machine.jpg").url()
-  }
-];
+// Load the list of supercomputers from data loader
+const supercomputers = await FileAttachment("data/supercomputers.json").json();
 ```
 
 ```js
 html`<div class="grid grid-cols-1" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
   ${supercomputers.map(sc => html`
-    <div class="card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url(${sc.image}); background-size: cover; background-position: center;">
-      <h2 style="margin-top: 0;"><a href="/supercomputers/${sc.slug}/">${sc.name}</a></h2>
-      <p>${sc.description}</p>
-    </div>
+    <a href="/supercomputers/${sc.slug}/" style="text-decoration: none; color: inherit;">
+      <div class="card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url(${sc.image}); background-size: cover; background-position: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+        <h2 style="margin: 0; font-size: 2rem;">${sc.name}</h2>
+      </div>
+    </a>
   `)}
-</div>`
+</div>
+
+<style>
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+</style>`
 ```
 
 ## About

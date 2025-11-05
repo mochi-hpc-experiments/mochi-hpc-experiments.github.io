@@ -1,0 +1,7 @@
+name: Polaris
+description: >
+  Polaris is Argonne's 34 petaflops supercomputer, featuring
+  560 compute notes, each equiped with 1 AMD EPYC "Milan" processor,
+  4 NVIDIA A100 GPUs, Unified Memory Architecture, 2 fabric endpoints,
+  and 2 NVMe SSDs. These nodes are connected using HPE Slingshot 11 in
+  a Dragonfly topology with adaptive routing.

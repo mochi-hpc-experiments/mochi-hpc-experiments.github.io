@@ -14,5 +14,8 @@
   "type": "module",
   "devDependencies": {
     "@observablehq/framework": "^1.13.3"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }

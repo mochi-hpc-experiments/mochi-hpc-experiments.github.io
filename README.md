@@ -8,9 +8,8 @@ This project uses [Observable Framework](https://observablehq.com/framework/) to
 .
 ├── src/
 │   ├── index.md                    # Main page with supercomputer list
-│   ├── supercomputers/             # Individual supercomputer pages
-│   │   ├── example-system-1.md
-│   │   └── example-system-2.md
+│   ├── supercomputers/             # Individual supercomputer folders
+│   │   └── polaris/                # Example: Polaris supercomputer
 │   └── data/                       # Data loaders for benchmark data
 ├── observablehq.config.js          # Framework configuration
 └── package.json                    # Dependencies and scripts

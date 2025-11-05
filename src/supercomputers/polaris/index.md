@@ -1,4 +1,4 @@
-# Example System 1
+# Polaris
 
 [← Back to all systems](/)
 
@@ -7,12 +7,16 @@ const machineImage = await FileAttachment("machine.jpg").url();
 ```
 
 ```js
-html`<img src="${machineImage}" alt="Example System 1" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 2rem;">`
+html`<img src="${machineImage}" alt="Polaris" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 2rem;">`
 ```
 
 ## System Overview
 
-This page displays benchmark performance data for Example System 1.
+Polaris is Argonne's 34 petaflops supercomputer, featuring
+560 compute nodes, each equipped with 1 AMD EPYC "Milan" processor,
+4 NVIDIA A100 GPUs, Unified Memory Architecture, 2 fabric endpoints,
+and 2 NVMe SSDs. These nodes are connected using HPE Slingshot 11 in
+a Dragonfly topology with adaptive routing.
 
 ## Performance Metrics
 
@@ -26,9 +30,9 @@ const performanceData = await FileAttachment("data.csv").csv({typed: true});
 ```js
 Plot.plot({
   marks: [
-    Plot.barY(performanceData, {x: "date", y: "throughput", fill: "steelblue"})
+    Plot.rectY(performanceData, {x: "date", y: "throughput", fill: "steelblue", interval: "day"})
   ],
-  x: {label: "Date"},
+  x: {type: "utc", label: "Date"},
   y: {label: "Throughput (MB/s)"},
   width: 800,
   height: 400
@@ -40,9 +44,9 @@ Plot.plot({
 ```js
 Plot.plot({
   marks: [
-    Plot.barY(performanceData, {x: "date", y: "latency", fill: "coral"})
+    Plot.rectY(performanceData, {x: "date", y: "latency", fill: "coral", interval: "day"})
   ],
-  x: {label: "Date"},
+  x: {type: "utc", label: "Date"},
   y: {label: "Latency (ms)"},
   width: 800,
   height: 400
@@ -51,7 +55,7 @@ Plot.plot({
 
 ## Benchmark Details
 
-- **System**: Example System 1
+- **System**: Polaris
 - **Latest Run**: ${new Date().toLocaleDateString()}
 - **Status**: Active
 

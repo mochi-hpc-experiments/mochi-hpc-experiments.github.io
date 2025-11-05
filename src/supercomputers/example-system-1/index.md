@@ -2,6 +2,14 @@
 
 [← Back to all systems](/)
 
+```js
+const machineImage = await FileAttachment("machine.jpg").url();
+```
+
+```js
+html`<img src="${machineImage}" alt="Example System 1" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 2rem;">`
+```
+
 ## System Overview
 
 This page displays benchmark performance data for Example System 1.
@@ -9,13 +17,8 @@ This page displays benchmark performance data for Example System 1.
 ## Performance Metrics
 
 ```js
-// Load performance data
-// Replace this with actual data loading from your data sources
-const performanceData = [
-  {date: "2024-01-01", throughput: 100, latency: 10},
-  {date: "2024-02-01", throughput: 120, latency: 9},
-  {date: "2024-03-01", throughput: 115, latency: 11},
-];
+// Load performance data from CSV file
+const performanceData = await FileAttachment("data.csv").csv({typed: true});
 ```
 
 ### Throughput Over Time
@@ -23,10 +26,9 @@ const performanceData = [
 ```js
 Plot.plot({
   marks: [
-    Plot.line(performanceData, {x: "date", y: "throughput", stroke: "steelblue"}),
-    Plot.dot(performanceData, {x: "date", y: "throughput", fill: "steelblue"})
+    Plot.barY(performanceData, {x: "date", y: "throughput", fill: "steelblue"})
   ],
-  x: {type: "utc", label: "Date"},
+  x: {label: "Date"},
   y: {label: "Throughput (MB/s)"},
   width: 800,
   height: 400
@@ -38,10 +40,9 @@ Plot.plot({
 ```js
 Plot.plot({
   marks: [
-    Plot.line(performanceData, {x: "date", y: "latency", stroke: "coral"}),
-    Plot.dot(performanceData, {x: "date", y: "latency", fill: "coral"})
+    Plot.barY(performanceData, {x: "date", y: "latency", fill: "coral"})
   ],
-  x: {type: "utc", label: "Date"},
+  x: {label: "Date"},
   y: {label: "Latency (ms)"},
   width: 800,
   height: 400

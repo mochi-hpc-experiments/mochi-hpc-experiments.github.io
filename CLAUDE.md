@@ -49,7 +49,10 @@ npm run clean
 ### Project Structure
 
 - `src/index.md` - Main landing page listing all supercomputers
-- `src/supercomputers/*.md` - Individual system pages with visualizations
+- `src/supercomputers/<system-name>/` - Each supercomputer has its own folder containing:
+  - `index.md` - System page with visualizations
+  - `machine.jpg` - System image for card background
+  - `data.csv` - Performance data
 - `src/data/` - Data loaders that fetch/process benchmark data at build time
 - `observablehq.config.js` - Framework configuration (title, header, footer, theme)
 - `dist/` - Build output (not tracked in git)
@@ -79,10 +82,19 @@ html`<div>${content}</div>`
 
 ## Adding a New Supercomputer
 
-1. Create `src/supercomputers/<system-slug>.md`
-2. Add entry to `supercomputers` array in `src/index.md`
-3. Add visualizations using Observable Plot
-4. Create data loaders in `src/data/` if fetching external benchmark results
+1. Create folder `src/supercomputers/<system-slug>/`
+2. Create `src/supercomputers/<system-slug>/index.md` with visualizations
+3. Add `src/supercomputers/<system-slug>/machine.jpg` for the card background image
+4. Add `src/supercomputers/<system-slug>/data.csv` or other data files
+5. Add entry to `supercomputers` array in `src/index.md`:
+   ```js
+   {
+     name: "System Name",
+     slug: "system-slug",
+     description: "Description text",
+     image: await FileAttachment("supercomputers/system-slug/machine.jpg").url()
+   }
+   ```
 
 ## Configuration
 

@@ -18,47 +18,30 @@ Polaris is Argonne's 34 petaflops supercomputer, featuring
 and 2 NVMe SSDs. These nodes are connected using HPE Slingshot 11 in
 a Dragonfly topology with adaptive routing.
 
-## Performance Metrics
-
-```js
-// Load performance data from CSV file
-const performanceData = await FileAttachment("data.csv").csv({typed: true});
-```
-
-### Throughput Over Time
-
-```js
-Plot.plot({
-  marks: [
-    Plot.rectY(performanceData, {x: "date", y: "throughput", fill: "steelblue", interval: "day"})
-  ],
-  x: {type: "utc", label: "Date"},
-  y: {label: "Throughput (MB/s)"},
-  width: 800,
-  height: 400
-})
-```
-
-### Latency Over Time
-
-```js
-Plot.plot({
-  marks: [
-    Plot.rectY(performanceData, {x: "date", y: "latency", fill: "coral", interval: "day"})
-  ],
-  x: {type: "utc", label: "Date"},
-  y: {label: "Latency (ms)"},
-  width: 800,
-  height: 400
-})
-```
-
-## Bandwidth Performance
+## Benchmark Results
 
 ```js
 // Load bandwidth data from CSV file
 const bandwidthData = await FileAttachment("bandwidth.csv").csv({typed: true});
+// Load GPU bandwidth data from CSV file
+const bandwidthDataGPU = await FileAttachment("gpu-bandwidth.csv").csv({typed: true});
+// Load latency data from CSV file
+const latencyData = await FileAttachment("latency.csv").csv({typed: true});
 ```
+
+The following results are collected from running the
+[mochi-tests](https://github.com/mochi-hpc-experiments/mochi-tests) everyday on Polaris.
+These tests consist of the following.
+
+* [Latency tests](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/margo-p2p-latency.c): report the round-trip time for a no-op RPC between two processes located on different nodes;
+* [Bandwidth tests](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/margo-p2p-bw.c): report the performance of RDMA operations between two processes located on different nodes;
+* [GPU bandwidth tests](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/gpu-margo-p2p-bw.cu): report the performance of RDMA operations between GPU or CPU memory of two processes located on different nodes.
+
+The following sections present these results in two forms: most recent daily run, and evolution over time.
+In the latter, dropdown menus are available to vary the parameters of the runs.
+
+## Bandwidth Performance
+
 
 ```js
 // Create input widgets for filtering
@@ -120,11 +103,3 @@ html`<div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
 - **System**: Polaris
 - **Latest Run**: ${new Date().toLocaleDateString()}
 - **Status**: Active
-
-## Data
-
-View the raw performance data:
-
-```js
-Inputs.table(performanceData)
-```

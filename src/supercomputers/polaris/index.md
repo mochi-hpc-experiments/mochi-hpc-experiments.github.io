@@ -44,6 +44,100 @@ The following sections present bandwidth and latency results in two forms:
 most recent daily run, and evolution over time.
 In the latter, dropdown menus are available to vary the parameters of the runs.
 
+## Latency Performance
+
+Latency is measured using the
+[margo-p2p-latency](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/margo-p2p-latency.c)
+benchmark, which runs on two processes located on distinct nodes, and issues no-op RPCs to measure round-trip time.
+
+### Latest Latency Results
+
+```js
+// Get unique dates from latency data and sort chronologically
+const latencyDates = [...new Set(latencyData.map(d => String(d.date)))]
+  .sort((a, b) => new Date(a) - new Date(b));
+const latestLatencyDateInput = Inputs.select(latencyDates, {
+  label: "Date",
+  value: latencyDates[latencyDates.length - 1]
+});
+const selectedLatencyDate = Generators.input(latestLatencyDateInput);
+```
+
+```js
+// Filter data for selected date (compare as strings)
+const latencyForDate = latencyData.filter(d => String(d.date) === selectedLatencyDate);
+
+// Prepare data for bar chart
+const latencyFalse = latencyForDate.find(d => d.busy_spin === false);
+const latencyTrue = latencyForDate.find(d => d.busy_spin === true);
+
+const latencyBarData = [
+  {
+    category: "Busy Spin: false",
+    latency: latencyFalse ? latencyFalse.med * 1e6 : 0
+  },
+  {
+    category: "Busy Spin: true",
+    latency: latencyTrue ? latencyTrue.med * 1e6 : 0
+  }
+];
+```
+
+```js
+html`<div style="margin-bottom: 1rem;">
+  ${latestLatencyDateInput}
+</div>`
+```
+
+```js
+Plot.plot({
+  marks: [
+    Plot.barY(latencyBarData, {x: "category", y: "latency", fill: "category"})
+  ],
+  x: {label: null, tickFormat: () => ""},
+  y: {label: "Latency (μs)"},
+  color: {legend: true},
+  width: 600,
+  height: 400,
+  marginLeft: 60,
+  marginBottom: 60
+})
+```
+
+### Latency Over Time
+
+```js
+// Create input widget for busy_spin filtering
+const latencyBusySpinInput = Inputs.select([true, false], {label: "Busy Spin", value: false});
+const latency_busy_spin = Generators.input(latencyBusySpinInput);
+```
+
+```js
+// Filter latency data based on busy_spin
+const filteredLatencyData = latencyData.filter(d => d.busy_spin === latency_busy_spin);
+```
+
+```js
+Plot.plot({
+  marks: [
+    Plot.rectY(filteredLatencyData, {x: "date", y: d => d.med * 1e6, fill: "coral", interval: "day"})
+  ],
+  x: {type: "utc", label: "Date", nice: true},
+  y: {label: "Latency (μs)"},
+  width: 800,
+  height: 400,
+  marginLeft: 60,
+  marginBottom: 40
+})
+```
+
+```js
+// Display the input widget
+html`<div style="margin-top: 1rem;">
+  ${latencyBusySpinInput}
+</div>`
+```
+
 ## Bandwidth Performance
 
 Bandwidth is measured using the
@@ -100,46 +194,6 @@ html`<div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
   ${concurrencyInput}
   ${busySpinInput}
   ${xferSizeInput}
-</div>`
-```
-
-## Latency Performance
-
-### Latest Latency Results
-
-TODO
-
-### Latency Over Time
-
-```js
-// Create input widget for busy_spin filtering
-const latencyBusySpinInput = Inputs.select([true, false], {label: "Busy Spin", value: false});
-const latency_busy_spin = Generators.input(latencyBusySpinInput);
-```
-
-```js
-// Filter latency data based on busy_spin
-const filteredLatencyData = latencyData.filter(d => d.busy_spin === latency_busy_spin);
-```
-
-```js
-Plot.plot({
-  marks: [
-    Plot.rectY(filteredLatencyData, {x: "date", y: d => d.med * 1e6, fill: "coral", interval: "day"})
-  ],
-  x: {type: "utc", label: "Date", nice: true},
-  y: {label: "Latency (μs)"},
-  width: 800,
-  height: 400,
-  marginLeft: 60,
-  marginBottom: 40
-})
-```
-
-```js
-// Display the input widget
-html`<div style="margin-top: 1rem;">
-  ${latencyBusySpinInput}
 </div>`
 ```
 

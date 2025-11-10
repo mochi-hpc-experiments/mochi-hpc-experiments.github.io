@@ -115,6 +115,13 @@ const latency_busy_spin = Generators.input(latencyBusySpinInput);
 ```js
 // Filter latency data based on busy_spin
 const filteredLatencyData = latencyData.filter(d => d.busy_spin === latency_busy_spin);
+
+// Calculate 30-day range ending at latest date
+const latestLatencyDate = latencyData.length > 0
+  ? new Date(Math.max(...latencyData.map(d => new Date(d.date))))
+  : new Date();
+const thirtyDaysAgo = new Date(latestLatencyDate);
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 ```
 
 ```js
@@ -122,7 +129,7 @@ Plot.plot({
   marks: [
     Plot.rectY(filteredLatencyData, {x: "date", y: d => d.med * 1e6, fill: "coral", interval: "day"})
   ],
-  x: {type: "utc", label: "Date", nice: true},
+  x: {type: "utc", label: "Date", domain: [thirtyDaysAgo, latestLatencyDate]},
   y: {label: "Latency (μs)"},
   width: 800,
   height: 400,
@@ -171,6 +178,13 @@ const filteredBandwidthData = bandwidthData.filter(d =>
   d.busy_spin === busy_spin &&
   d.xfer_size === xfer_size
 );
+
+// Calculate 30-day range ending at latest date
+const latestBandwidthDate = bandwidthData.length > 0
+  ? new Date(Math.max(...bandwidthData.map(d => new Date(d.date))))
+  : new Date();
+const thirtyDaysAgoBandwidth = new Date(latestBandwidthDate);
+thirtyDaysAgoBandwidth.setDate(thirtyDaysAgoBandwidth.getDate() - 30);
 ```
 
 ```js
@@ -178,7 +192,7 @@ Plot.plot({
   marks: [
     Plot.rectY(filteredBandwidthData, {x: "date", y: d => d["MiB/s"] / 1024, fill: "green", interval: "day"})
   ],
-  x: {type: "utc", label: "Date", nice: true},
+  x: {type: "utc", label: "Date", domain: [thirtyDaysAgoBandwidth, latestBandwidthDate]},
   y: {label: "Throughput (GiB/s)"},
   width: 800,
   height: 400,

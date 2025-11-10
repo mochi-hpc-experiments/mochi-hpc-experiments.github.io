@@ -328,3 +328,131 @@ html`<div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
 </div>`
 ```
 
+## GPU Bandwidth Performance
+
+GPU bandwidth is measured using the
+[gpu-margo-p2p-bw](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/gpu-margo-p2p-bw.cu)
+benchmark, which runs on two processes located on distinct nodes, and transfers data using RDMA between CPU and/or GPU memory.
+
+### Latest GPU Bandwidth Results
+
+
+```js
+// Get unique dates from GPU bandwidth data and sort chronologically
+const gpuBandwidthDates = [...new Set(bandwidthDataGPU.map(d => String(d.date)))]
+  .sort((a, b) => new Date(a) - new Date(b));
+const latestGPUBandwidthDateInput = Inputs.select(gpuBandwidthDates, {
+  label: "Date",
+  value: gpuBandwidthDates[gpuBandwidthDates.length - 1]
+});
+const selectedGPUBandwidthDate = Generators.input(latestGPUBandwidthDateInput);
+```
+
+```js
+// Filter data for selected date
+const gpuBandwidthForDate = bandwidthDataGPU.filter(d => String(d.date) === selectedGPUBandwidthDate);
+
+// Create data for all memory combinations and operations
+const memCombinations = [
+  {hostA: "GPU", hostB: "GPU"},
+  {hostA: "GPU", hostB: "CPU"},
+  {hostA: "CPU", hostB: "GPU"},
+  {hostA: "CPU", hostB: "CPU"}
+];
+
+const ops = ["PULL", "PUSH"];
+const gpuBandwidthBarData = [];
+
+for (const mem of memCombinations) {
+  for (const op of ops) {
+    const entry = gpuBandwidthForDate.find(d =>
+      d.op === op &&
+      d.hostA_mem === mem.hostA &&
+      d.hostB_mem === mem.hostB
+    );
+    // Arrow direction: → for PULL (A pulls from B), ← for PUSH (A pushes to B)
+    const arrow = op === "PULL" ? "→" : "←";
+    gpuBandwidthBarData.push({
+      category: `${mem.hostA}${arrow}${mem.hostB}`,
+      throughput: entry ? entry["MiB/s"] / 1024 : 0
+    });
+  }
+}
+```
+
+The following graph shows the GPU bandwidth for different memory locations on each host.
+HostA and HostB refer to the two processes on distinct nodes.
+Host A is always the sender of an RPC to Host B. The latter issues the RDMA transfer (PUSH or PULL). Hence "GPU←CPU" means that Host B issues a PUSH from its CPU memory to Host A's GPU memory. "GPU→CPU" means that Host B issues a PULL from Host A's GPU memory to Host B's CPU memory.
+
+```js
+html`<div style="margin-bottom: 1rem;">
+  ${latestGPUBandwidthDateInput}
+</div>`
+```
+
+```js
+Plot.plot({
+  marks: [
+    Plot.barY(gpuBandwidthBarData, {x: "category", y: "throughput", fill: "category"})
+  ],
+  x: {label: null, tickFormat: () => ""},
+  y: {label: "Throughput (GiB/s)", grid: true},
+  color: {legend: true},
+  width: 800,
+  height: 400,
+  marginLeft: 60,
+  marginBottom: 60
+})
+```
+
+### GPU Bandwidth Over Time
+
+```js
+// Create input widgets for GPU bandwidth filtering
+const gpuOperationInput = Inputs.select(["PULL", "PUSH"], {label: "Operation", value: "PULL"});
+const gpuOperation = Generators.input(gpuOperationInput);
+const hostAMemInput = Inputs.select(["CPU", "GPU"], {label: "Host A Memory", value: "GPU"});
+const hostA_mem = Generators.input(hostAMemInput);
+const hostBMemInput = Inputs.select(["CPU", "GPU"], {label: "Host B Memory", value: "GPU"});
+const hostB_mem = Generators.input(hostBMemInput);
+```
+
+```js
+// Filter GPU bandwidth data based on selected inputs
+const filteredGPUBandwidthData = bandwidthDataGPU.filter(d =>
+  d.op === gpuOperation &&
+  d.hostA_mem === hostA_mem &&
+  d.hostB_mem === hostB_mem
+);
+
+// Calculate 30-day range ending at latest date
+const latestGPUBandwidthDate = bandwidthDataGPU.length > 0
+  ? new Date(Math.max(...bandwidthDataGPU.map(d => new Date(d.date))))
+  : new Date();
+const thirtyDaysAgoGPUBandwidth = new Date(latestGPUBandwidthDate);
+thirtyDaysAgoGPUBandwidth.setDate(thirtyDaysAgoGPUBandwidth.getDate() - 30);
+```
+
+```js
+Plot.plot({
+  marks: [
+    Plot.rectY(filteredGPUBandwidthData, {x: "date", y: d => d["MiB/s"] / 1024, fill: "purple", interval: "day"})
+  ],
+  x: {type: "utc", label: "Date", domain: [thirtyDaysAgoGPUBandwidth, latestGPUBandwidthDate]},
+  y: {label: "Throughput (GiB/s)", grid: true},
+  width: 800,
+  height: 400,
+  marginLeft: 60,
+  marginBottom: 40
+})
+```
+
+```js
+// Display the input widgets
+html`<div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+  ${gpuOperationInput}
+  ${hostAMemInput}
+  ${hostBMemInput}
+</div>`
+```
+

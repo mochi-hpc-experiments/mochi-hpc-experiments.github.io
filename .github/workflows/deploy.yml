@@ -2,9 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   # Uncomment to enable automatic deployment on push to main
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:

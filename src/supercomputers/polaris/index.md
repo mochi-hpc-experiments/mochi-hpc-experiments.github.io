@@ -18,7 +18,7 @@ Polaris is Argonne's 34 petaflops supercomputer, featuring
 and 2 NVMe SSDs. These nodes are connected using HPE Slingshot 11 in
 a Dragonfly topology with adaptive routing.
 
-## Benchmark Results
+## Benchmark Details
 
 ```js
 // Load bandwidth data from CSV file
@@ -29,38 +29,43 @@ const bandwidthDataGPU = await FileAttachment("gpu-bandwidth.csv").csv({typed: t
 const latencyData = await FileAttachment("latency.csv").csv({typed: true});
 ```
 
+```js
+// Get the latest date from the data
+const latestDate = latencyData.length > 0
+  ? new Date(latencyData[latencyData.length - 1].date).toLocaleDateString()
+  : "N/A";
+```
+
+- **Latest Run**: ${latestDate}
+
 The following results are collected from running the
-[mochi-tests](https://github.com/mochi-hpc-experiments/mochi-tests) everyday on Polaris.
-These tests consist of the following.
-
-* [Latency tests](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/margo-p2p-latency.c): report the round-trip time for a no-op RPC between two processes located on different nodes;
-* [Bandwidth tests](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/margo-p2p-bw.c): report the performance of RDMA operations between two processes located on different nodes;
-* [GPU bandwidth tests](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/gpu-margo-p2p-bw.cu): report the performance of RDMA operations between GPU or CPU memory of two processes located on different nodes.
-
-The following sections present these results in two forms: most recent daily run, and evolution over time.
+[mochi-tests](https://github.com/mochi-hpc-experiments/mochi-tests) every day on Polaris.
+The following sections present bandwidth and latency results in two forms:
+most recent daily run, and evolution over time.
 In the latter, dropdown menus are available to vary the parameters of the runs.
 
 ## Bandwidth Performance
 
+Bandwidth is measured using the
+[margo-p2p-bw](https://github.com/mochi-hpc-experiments/mochi-tests/blob/main/perf-regression/margo-p2p-bw.c)
+benchmark, which runs on two processes located on distinct nodes, and transfers data using RDMA.
+
+### Latest Bandwidth Results
+
+TODO
+
+### Bandwidth Over Time
 
 ```js
 // Create input widgets for filtering
 const operationInput = Inputs.select(["PULL", "PUSH"], {label: "Operation", value: "PULL"});
 const operation = Generators.input(operationInput);
-```
-
-```js
 const concurrencyInput = Inputs.select([1, 8], {label: "Concurrency", value: 1});
 const concurrency = Generators.input(concurrencyInput);
-```
-
-```js
 const busySpinInput = Inputs.select([true, false], {label: "Busy Spin", value: false});
 const busy_spin = Generators.input(busySpinInput);
-```
-
-```js
-const xferSizeInput = Inputs.select([1048576, 8388608, 1000000], {label: "Transfer Size (bytes)", value: 1048576});
+const xferSizeInput = Inputs.select([1048576, 8388608, 1000000],
+                                    {label: "Transfer Size (bytes)", value: 1048576});
 const xfer_size = Generators.input(xferSizeInput);
 ```
 
@@ -74,17 +79,17 @@ const filteredBandwidthData = bandwidthData.filter(d =>
 );
 ```
 
-### Bandwidth Over Time
-
 ```js
 Plot.plot({
   marks: [
     Plot.rectY(filteredBandwidthData, {x: "date", y: d => d["MiB/s"] / 1024, fill: "green", interval: "day"})
   ],
-  x: {type: "utc", label: "Date"},
+  x: {type: "utc", label: "Date", nice: true},
   y: {label: "Throughput (GiB/s)"},
   width: 800,
-  height: 400
+  height: 400,
+  marginLeft: 60,
+  marginBottom: 40
 })
 ```
 
@@ -98,8 +103,43 @@ html`<div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
 </div>`
 ```
 
-## Benchmark Details
+## Latency Performance
 
-- **System**: Polaris
-- **Latest Run**: ${new Date().toLocaleDateString()}
-- **Status**: Active
+### Latest Latency Results
+
+TODO
+
+### Latency Over Time
+
+```js
+// Create input widget for busy_spin filtering
+const latencyBusySpinInput = Inputs.select([true, false], {label: "Busy Spin", value: false});
+const latency_busy_spin = Generators.input(latencyBusySpinInput);
+```
+
+```js
+// Filter latency data based on busy_spin
+const filteredLatencyData = latencyData.filter(d => d.busy_spin === latency_busy_spin);
+```
+
+```js
+Plot.plot({
+  marks: [
+    Plot.rectY(filteredLatencyData, {x: "date", y: d => d.med * 1e6, fill: "coral", interval: "day"})
+  ],
+  x: {type: "utc", label: "Date", nice: true},
+  y: {label: "Latency (μs)"},
+  width: 800,
+  height: 400,
+  marginLeft: 60,
+  marginBottom: 40
+})
+```
+
+```js
+// Display the input widget
+html`<div style="margin-top: 1rem;">
+  ${latencyBusySpinInput}
+</div>`
+```
+

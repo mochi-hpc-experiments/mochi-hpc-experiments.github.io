@@ -456,3 +456,21 @@ html`<div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
 </div>`
 ```
 
+## Spack Environment
+
+```js
+const spackYaml = await FileAttachment("spack.yaml").text();
+```
+
+The following is the Spack environment used for the latest run. This environment mostly comes from 
+[the Mochi Platform Configurations](https://github.com/mochi-hpc-experiments/platform-configurations/tree/main/ANL/Polaris).
+
+```js
+html`<details>
+  <summary style="cursor: pointer; padding: 0.5rem; background-color: #f5f5f5; border-radius: 4px; user-select: none;">
+    Click to expand spack.yaml
+  </summary>
+  <pre style="margin-top: 0.5rem; padding: 1rem; background-color: #f5f5f5; border-radius: 4px; overflow-x: auto;"><code>${spackYaml}</code></pre>
+</details>`
+```
+

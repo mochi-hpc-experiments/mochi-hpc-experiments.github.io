@@ -95,7 +95,7 @@ Plot.plot({
     Plot.barY(latencyBarData, {x: "category", y: "latency", fill: "category"})
   ],
   x: {label: null, tickFormat: () => ""},
-  y: {label: "Latency (μs)"},
+  y: {label: "Latency (μs)", grid: true},
   color: {legend: true},
   width: 600,
   height: 400,
@@ -130,7 +130,7 @@ Plot.plot({
     Plot.rectY(filteredLatencyData, {x: "date", y: d => d.med * 1e6, fill: "coral", interval: "day"})
   ],
   x: {type: "utc", label: "Date", domain: [thirtyDaysAgo, latestLatencyDate]},
-  y: {label: "Latency (μs)"},
+  y: {label: "Latency (μs)", grid: true},
   width: 800,
   height: 400,
   marginLeft: 60,
@@ -153,7 +153,124 @@ benchmark, which runs on two processes located on distinct nodes, and transfers 
 
 ### Latest Bandwidth Results
 
-TODO
+```js
+// Get unique dates from bandwidth data and sort chronologically
+const bandwidthDates = [...new Set(bandwidthData.map(d => String(d.date)))]
+  .sort((a, b) => new Date(a) - new Date(b));
+const latestBandwidthDateInput = Inputs.select(bandwidthDates, {
+  label: "Date",
+  value: bandwidthDates[bandwidthDates.length - 1]
+});
+const selectedBandwidthDate = Generators.input(latestBandwidthDateInput);
+```
+
+```js
+// Filter data for selected date
+const bandwidthForDate = bandwidthData.filter(d => String(d.date) === selectedBandwidthDate);
+
+// Create function to generate data for specific op and busy_spin
+function getBandwidthData(op, busySpin) {
+  const concurrencies = [1, 8];
+  const xferSizes = {1048576: "1MiB", 8388608: "8MiB", 1000000: "1MB"};
+  const data = [];
+
+  for (const conc of concurrencies) {
+    for (const [xferSize, xferLabel] of Object.entries(xferSizes)) {
+      const entry = bandwidthForDate.find(d =>
+        d.op === op &&
+        d.concurrency === conc &&
+        d.xfer_size === Number(xferSize) &&
+        d.busy_spin === busySpin
+      );
+      data.push({
+        category: `C${conc}-${xferLabel}`,
+        throughput: entry ? entry["MiB/s"] / 1024 : 0
+      });
+    }
+  }
+  return data;
+}
+
+const bandwidthPullFalse = getBandwidthData("PULL", false);
+const bandwidthPullTrue = getBandwidthData("PULL", true);
+const bandwidthPushFalse = getBandwidthData("PUSH", false);
+const bandwidthPushTrue = getBandwidthData("PUSH", true);
+```
+
+The following graphs show the bandwidth for different levels of transfer concurrency
+(1 or 8 threads) and different transfer sizes (1 MB, 1 MiB, or 8 MiB). Legends
+indicate the concurrency and transfer sizes (e.g. 1C-1MB represents 1 thread and 1 MB transfers).
+
+```js
+html`<div style="margin-bottom: 1rem;">
+  ${latestBandwidthDateInput}
+</div>`
+```
+
+```js
+html`<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+  <div>
+    <h4 style="text-align: center; margin-bottom: 0.5rem;">PULL, Busy Spin: false</h4>
+    ${Plot.plot({
+      marks: [
+        Plot.barY(bandwidthPullFalse, {x: "category", y: "throughput", fill: "category"})
+      ],
+      x: {label: null},
+      y: {label: "Throughput (GiB/s)", grid: true},
+      color: {legend: true},
+      width: 380,
+      height: 300,
+      marginLeft: 60,
+      marginBottom: 60
+    })}
+  </div>
+  <div>
+    <h4 style="text-align: center; margin-bottom: 0.5rem;">PULL, Busy Spin: true</h4>
+    ${Plot.plot({
+      marks: [
+        Plot.barY(bandwidthPullTrue, {x: "category", y: "throughput", fill: "category"})
+      ],
+      x: {label: null},
+      y: {label: "Throughput (GiB/s)", grid: true},
+      color: {legend: true},
+      width: 380,
+      height: 300,
+      marginLeft: 60,
+      marginBottom: 60
+    })}
+  </div>
+  <div>
+    <h4 style="text-align: center; margin-bottom: 0.5rem;">PUSH, Busy Spin: false</h4>
+    ${Plot.plot({
+      marks: [
+        Plot.barY(bandwidthPushFalse, {x: "category", y: "throughput", fill: "category"})
+      ],
+      x: {label: null},
+      y: {label: "Throughput (GiB/s)", grid: true},
+      color: {legend: true},
+      width: 380,
+      height: 300,
+      marginLeft: 60,
+      marginBottom: 60
+    })}
+  </div>
+  <div>
+    <h4 style="text-align: center; margin-bottom: 0.5rem;">PUSH, Busy Spin: true</h4>
+    ${Plot.plot({
+      marks: [
+        Plot.barY(bandwidthPushTrue, {x: "category", y: "throughput", fill: "category"})
+      ],
+      x: {label: null},
+      y: {label: "Throughput (GiB/s)", grid: true},
+      color: {legend: true},
+      width: 380,
+      height: 300,
+      marginLeft: 60,
+      marginBottom: 60
+    })}
+  </div>
+</div>`
+```
 
 ### Bandwidth Over Time
 
@@ -193,7 +310,7 @@ Plot.plot({
     Plot.rectY(filteredBandwidthData, {x: "date", y: d => d["MiB/s"] / 1024, fill: "green", interval: "day"})
   ],
   x: {type: "utc", label: "Date", domain: [thirtyDaysAgoBandwidth, latestBandwidthDate]},
-  y: {label: "Throughput (GiB/s)"},
+  y: {label: "Throughput (GiB/s)", grid: true},
   width: 800,
   height: 400,
   marginLeft: 60,

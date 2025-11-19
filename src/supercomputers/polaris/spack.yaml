@@ -102,4 +102,4 @@ spack:
       - spec: ncurses@6.1
         prefix: /usr
   repos:
-    mochi: /home/mdorier/.jacamar-ci/builds/dDoxCnU6M/000/anl/radix-io/mochi-regression-polaris/sandbox/mochi-spack-packages
+    mochi: /home/mdorier/.jacamar-ci/builds/8zgLzzpZx/000/anl/radix-io/mochi-regression-polaris/sandbox/mochi-spack-packages

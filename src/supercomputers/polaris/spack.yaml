@@ -18,7 +18,6 @@ spack:
       externals:
       - spec: gcc@14.2.0 languages:='c,c++,fortran'
         prefix: /opt/cray/pe/gcc-native/14
-        target: any
         extra_attributes:
           compilers:
             c: /opt/cray/pe/gcc-native/14/bin/gcc
@@ -34,7 +33,10 @@ spack:
       buildable: false
       externals:
       - spec: cray-mpich@8.1.32
+        prefix: /opt/cray/pe/mpich/8.1.32/ofi/gnu/12.3
         modules:
+        - PrgEnv-gnu/8.6.0
+        - libfabric/1.22.0
         - cray-mpich/8.1.32
     mercury:
       require:
@@ -102,4 +104,4 @@ spack:
       - spec: ncurses@6.1
         prefix: /usr
   repos:
-    mochi: /home/mdorier/.jacamar-ci/builds/dDoxCnU6M/000/anl/radix-io/mochi-regression-polaris/sandbox/mochi-spack-packages
+    mochi: /home/mdorier/.jacamar-ci/builds/8zgLzzpZx/000/anl/radix-io/mochi-regression-polaris/sandbox/mochi-spack-packages

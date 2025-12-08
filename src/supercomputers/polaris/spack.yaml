@@ -13,6 +13,12 @@ spack:
     prefix_inspections:
       lib: [LD_LIBRARY_PATH]
       lib64: [LD_LIBRARY_PATH]
+  repos:
+    mochi:
+      git: https://github.com/mochi-hpc/mochi-spack-packages.git
+      # if you want to use a specific commit, uncomment and change the following line
+      # commit: <commit-hash>
+      destination: $env/repos
   packages:
     gcc:
       externals:
@@ -103,5 +109,3 @@ spack:
       externals:
       - spec: ncurses@6.1
         prefix: /usr
-  repos:
-    mochi: /home/mdorier/.jacamar-ci/builds/dDoxCnU6M/000/anl/radix-io/mochi-regression-polaris/sandbox/mochi-spack-packages

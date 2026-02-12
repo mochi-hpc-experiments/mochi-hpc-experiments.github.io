@@ -1,0 +1,78 @@
+name: Check for performance regressions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/supercomputers/polaris/**.csv'
+
+jobs:
+  check-regression:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check CSVs for regressions
+        id: regression
+        run: |
+          today=$(date -u +%Y-%m-%d)
+          echo "today=$today" >> "$GITHUB_OUTPUT"
+          has_anomaly=false
+          mkdir -p /tmp/regression-reports
+
+          for csv in $(git diff --name-only HEAD~1 HEAD -- 'src/supercomputers/polaris/**.csv'); do
+            if [ ! -f "$csv" ]; then
+              continue
+            fi
+
+            last_date=$(tail -1 "$csv" | cut -d',' -f1)
+            if [ "$last_date" != "$today" ]; then
+              echo "Skipping $csv: last date ($last_date) is not today ($today)"
+              continue
+            fi
+
+            echo "Running regression check on $csv"
+            report_file="/tmp/regression-reports/$(basename "$csv" .csv).txt"
+            if ! python3 scripts/check_regression.py "$csv" > "$report_file" 2>&1; then
+              has_anomaly=true
+              echo "Anomalies detected in $csv"
+            fi
+          done
+
+          echo "has_anomaly=$has_anomaly" >> "$GITHUB_OUTPUT"
+
+      - name: Comment on issue
+        if: steps.regression.outputs.has_anomaly == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const today = '${{ steps.regression.outputs.today }}';
+            const dir = '/tmp/regression-reports';
+            const files = fs.readdirSync(dir);
+
+            let body = `## Anomaly detected on ${today}\n\n`;
+            let found = false;
+
+            for (const file of files.sort()) {
+              const content = fs.readFileSync(path.join(dir, file), 'utf8');
+              if (content.includes('REGRESSION')) {
+                found = true;
+                body += `### ${file.replace('.txt', '.csv')}\n\n`;
+                body += '```\n' + content.trimEnd() + '\n```\n\n';
+              }
+            }
+
+            if (found) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: 1,
+                body: body.trimEnd()
+              });
+            }

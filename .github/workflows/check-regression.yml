@@ -1,6 +1,7 @@
 name: Check for performance regressions
 
 on:
+  workflow_dispatch: {}
   push:
     branches:
       - main
